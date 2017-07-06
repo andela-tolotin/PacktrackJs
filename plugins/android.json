@@ -1,0 +1,30 @@
+{
+    "prepare_queue": {
+        "installed": [],
+        "uninstalled": []
+    },
+    "config_munge": {
+        "files": {}
+    },
+    "installed_plugins": {
+        "cordova-plugin-device": {
+            "PACKAGE_NAME": "xdk.intel.sample"
+        },
+        "cordova-plugin-splashscreen": {
+            "PACKAGE_NAME": "xdk.intel.sample"
+        },
+        "cordova-plugin-statusbar": {
+            "PACKAGE_NAME": "xdk.intel.sample"
+        },
+        "phonegap-plugin-barcodescanner": {
+            "PACKAGE_NAME": "xdk.intel.sample"
+        },
+        "cordova-plugin-whitelist": {
+            "PACKAGE_NAME": "xdk.intel.sample"
+        },
+        "cordova-plugin-android-permissions": {
+            "PACKAGE_NAME": "xdk.intel.sample"
+        }
+    },
+    "dependent_plugins": {}
+}
