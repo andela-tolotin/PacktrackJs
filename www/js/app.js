@@ -8,7 +8,7 @@
 /*global $:false, intel:false app:false, dev:false, cordova:false */
 // This file contains your event handlers, the center of your application.
 // NOTE: see app.initEvents() in init-app.js for event handler initialization code.
-function myEventHandler() {
+function myEventHandler() {  //cordova preparing the device
   "use strict";
 
   var ua = navigator.userAgent;
@@ -39,19 +39,21 @@ function packageDelivery() {
   var baseURL = "https://packtracking.herokuapp.com/api/";
   var fName = "scan():";
 
-  console.log(fName, "entry");
+  //console.log(fName, "entry"); for debugging purposes only
 
   try {
     if (window.tinyHippos) {
       thirdPartyEmulator();
       console.log(fName, "emulator alert");
     } else {
-      var modalForm = $(document).find('div#signature-info');
-      var saveButton = document.getElementById('save');
-      var cancelButton = document.getElementById('clear');
-      var deliveryName = document.getElementById('printed_name');
+        
+      var modalForm = $(document).find('div#signature-info'); //modalForm: the modal form for package delivery
+      var saveButton = document.getElementById('save');         //saveButton: the button to the clicked to submit the package delivery
+      var cancelButton = document.getElementById('clear');  /// clear the signature pad
+      var deliveryName = document.getElementById('printed_name'); // capture the input name of the package delivery officer
+
       cordova.plugins.barcodeScanner.scan(function(result) {
-          console.log(fName, "Scanned result found!");
+          //console.log(fName, "Scanned result found!"); for debugging purposes only
 
           if (result.text == '') {
             return false;
@@ -59,161 +61,157 @@ function packageDelivery() {
 
           alert("Scann Succeded!\n" + "Result: " + result.text + "\n");
 
-          var packageNumber = result.text;
-
+          var packageNumber = result.text; // get the package number from the barcode scanner
+           // initialize the canvas for signature
+            var signaturePad = null;
+          // Once the package has been scanned and the officer sign that the package
+          // was delivered then the package number is sent to the server
+          // if it has been delivered before then the user get inform and if not 
+          //  it gets a confirmation message that the package was successfully delivered.
           makeAjaxRequest(baseURL + 'packages/' + packageNumber + '/user', {}, 'GET')
             .done(function(res) {
               if (res.status) {
                 // show confirmation dialog
                 var found = confirm("Please confirm the package recipient \n Recipient Name: " + res.data.name + "\n" + " Package Number: " + packageNumber);
 
-                if (found) {
-                  // return console.log('Message', 'Recipient Found');
-
-
-                  modalForm.modal('show');
-
-                  var signaturePad = new SignaturePad(document.getElementById('signature-pad'), {
+                signaturePad =  new SignaturePad(document.getElementById('signature-pad'), {
                     backgroundColor: 'rgba(255, 255, 255, 0)',
                     penColor: 'rgb(0, 0, 0)'
-                  });
+                });
 
+                if (found) {
+                  modalForm.modal('show'); // hide the modal form
                 }
-
 
                 return false;
               }
 
-              return alert(res.message);
+              return alert(res.message); //alert when package has never been receive, meaning was not found in the database.
 
-            }).fail(function(error) {
-              console.log('Error', error);
+            }).fail(function(error) {   //fails due ti server or network   
+             // console.log('Error', error); for debugging purposes
 
             });
         },
-        function(error) {
+        function(error) {       //when the scannig fails, device failure
           alert("Scanning failed: " + error);
         }, {
-          orientation: "portrait"
+          orientation: "portrait"   //keeps the screen in portrait mode
         }
       );
-
+      // Save the signature and package number
       saveButton.addEventListener('click', function(event) {
-        var data = signaturePad.toDataURL('image/png');
-        var printedName = deliveryName.value;
+        var data = signaturePad.toDataURL('image/png'); // convert the signature to base64 image data
+        var printedName = deliveryName.value; // get the officer delivering the package name
         // send the data to the server
-
         makeAjaxRequest(baseURL + 'packages/' + packageNumber + '/deliver', {
-          'package_number': packageNumber,
-          'printed_name': printedName,
-          'signature': data
-        }, 'POST').done(function(res) {
+          'package_number': packageNumber, // package number
+          'printed_name': printedName, // officer name
+          'signature': data // signature
+        }, 'POST').done(function(res) { // successful response
           saveButton.removeEventListener('click', function() {});
-          if (res.status) {
+          if (res.status) { // if successful
             alert(res.message);
-
-            return modalForm.modal('hide');
+            return modalForm.modal('hide'); // hide modal form
           }
-
           alert(res.message);
-          return modalForm.modal('hide');
+          return modalForm.modal('hide'); // hide modal form
         }).fail(function(error) {
-          console.log('Error:', error);
+          //console.log('Error:', error); for debugging purposes only
         });
       });
-
+      // clear the signature canvas
       cancelButton.addEventListener('click', function(event) {
         signaturePad.clear();
         // return false;
       });
     }
   } catch (e) {
-    console.log('Error', e);
+   // console.log('Error', e); for debugging purposes
   }
 
 }
 
-
-function scan() {
+function scan() {     //packages receival
   "use strict";
-  var fName = "scan():";
-  console.log(fName, "entry")
+  var fName = "scan():";    
+  //console.log(fName, "entry");for debugging purposes
 
   try {
-    if (window.tinyHippos) {
+    if (window.tinyHippos) { //ba
       thirdPartyEmulator();
-      console.log(fName, "emulator alert");
+    //  console.log(fName, "emulator alert");for debugging purposes
     } else {
-      var modalForm = $(document).find('div#user-info');
+      var modalForm = $(document).find('div#user-info'); //modal form TO and FROM
       var okButton = modalForm.find('button.ok');
-      cordova.plugins.barcodeScanner.scan(function(result) {
+      cordova.plugins.barcodeScanner.scan(function(result) { //cordova barcode scanner initialization plugin 
 
-          console.log(fName, "Scanned result found!");
+         // console.log(fName, "Scanned result found!");for debugging purposes
 
-          if (result.text == '') {
+          if (result.text == '') {  //if barcide scanner cannot be red by barcode scanner
             return false;
           }
 
-          alert("Scann Succeded!\n" + "Result: " + result.text + "\n");
+          alert("Scann Succeded!\n" + "Result: " + result.text + "\n");  //scannin succesful
 
-          var packageNumber = result.text;
+          var packageNumber = result.text;  //outputs tracking number
 
-          $(document).find('input[type="hidden"]#package_number').val(packageNumber);
+          $(document).find('input[type="hidden"]#package_number').val(packageNumber); //search tracking number from the form
 
-          showModalForm();
+          showModalForm();      //activates modal form
         },
-        function(error) {
+        function(error) {          //scanning failed due to device failure
           alert("Scanning failed: " + error);
         },
 
       );
 
-      okButton.on('click', function() {
+      okButton.on('click', function() {  //submits the form in form of number, recipient and sender
         var packageNumber = $(document).find('input[type="hidden"]#package_number').val();
         var recipient = modalForm.find('input#to_recipient').val();
         var sender = modalForm.find('input#from').val();
 
-        makeAjaxRequest('https://packtracking.herokuapp.com/api/packages', {
-          'package_number': packageNumber,
+        makeAjaxRequest('https://packtracking.herokuapp.com/api/packages', {    //API end point
+          'package_number': packageNumber, 
           'sender': sender,
           'recipient': recipient,
         }, 'POST').done(function(data) {
-          //alert(JSON.stringify(data));
-          okButton.unbind('click');
 
-          if (data.status) {
+          okButton.unbind('click');  //unbinind the event to prevent multiple submitions
+
+          if (data.status) {          //if submited hides the moal form then return success message
             modalForm.modal('hide');
             clearForm(modalForm);
             return alert(data.message);
           }
 
-          alert(data.message);
+          alert(data.message);   //returns error if not added then clears the form and hide the modal form
           clearForm(modalForm);
           return modalForm.modal('hide');
 
-        }).fail(function(error) {
-          return console.log(error);
+        }).fail(function(error) {       //if AJAX fails report the error
+        //return console.log(error); for debugging only
         });
 
-        return false;
+        return false;       //prevent form from reloading when the buttonis clicked
 
       });
 
     }
-  } catch (e) {
-    console.log(fName, "catch, failure");
+  } catch (e) {     //catch any errors 
+    //console.log(fName, "catch, failure");for debugging only
   }
 
-  console.log(fName, "exit");
+  //console.log(fName, "exit");for debugging only
 }
 
-function clearForm(modalForm) {
-  modalForm.find('input#to_recipient').val('');
-  modalForm.find('input#from').val('');
+function clearForm(modalForm) {     //clears the form input fields
+  modalForm.find('input#to_recipient').val('');     //empies the field
+  modalForm.find('input#from').val('');     //empies the field
 
 }
 
-function makeAjaxRequest(url, params, method) {
+function makeAjaxRequest(url, params, method) {     //makes AJAX request and returns a promise
   return $.ajax({
     url: url,
     type: method,
@@ -221,31 +219,29 @@ function makeAjaxRequest(url, params, method) {
   });
 }
 
-function showModalForm() {
+function showModalForm() {      //auto complete for modal form
   $(document).ready(function() {
     var autocompleteOptions = {
-      minLength: 3,
+      minLength: 3,  //need at least 3 character to autocomplete
       source: function(request, response) {
         $.ajax({
-          type: "GET",
+          type: "GET",  //sends get request to the server
           url: "https://packtracking.herokuapp.com/api/users",
-          success: function(data) {
-            var matcher = new RegExp("^" + $.ui.autocomplete.escapeRegex(request.term), "i");
+          success: function(data) { //if succeded
+            var matcher = new RegExp("^" + $.ui.autocomplete.escapeRegex(request.term), "i");  //Filter user requests in the returned results
             response($.grep(data, function(item) {
-              return matcher.test(item);
+              return matcher.test(item); // return macted items or names
             }));
-            //response(data);
           }
         });
       }
     };
 
+    // Append the autocomplete to the modal form
     var modalForm = $(document).find('div#user-info');
     if (modalForm.length > 0) {
       var fInput = $("input#to_recipient");
-
       fInput.autocomplete(autocompleteOptions);
-
       modalForm.modal('show');
     }
   });

@@ -1,135 +1,100 @@
 <!DOCTYPE html>
 <html>
-<!--
-  * Please see the included README.md file for license terms and conditions.
-  -->
-
-<head>
+  <!--
+    * Please see the included README.md file for license terms and conditions.
+    -->
+  <head>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-
     <!-- see http://webdesign.tutsplus.com/tutorials/htmlcss-tutorials/quick-tip-dont-forget-the-viewport-meta-tag -->
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=no">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    
-<meta http-equiv="Content-Security-Policy" content="default-src * gap: ws: https://ssl.gstatic.com;style-src * 'unsafe-inline' 'self' data: blob:;script-src * 'unsafe-inline' 'unsafe-eval' data: blob:;img-src * data: 'unsafe-inline' 'self' content:;fmedia-src mediastream;">
-
-        <meta name="format-detection" content="telephone=no">
-        <meta name="msapplication-tap-highlight" content="no">
-        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
-        <link rel="stylesheet" type="text/css" href="css/index.css">
-        <title>PackTrack</title>
-
-
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta http-equiv="Content-Security-Policy" content="default-src * gap: ws: https://ssl.gstatic.com;style-src * 'unsafe-inline' 'self' data: blob:;script-src * 'unsafe-inline' 'unsafe-eval' data: blob:;img-src * data: 'unsafe-inline' 'self' content:;fmedia-src mediastream;">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <title>PackTrack</title>
     <style>
-        /* following two viewport lines are equivalent to meta viewport statement above, and is needed for Windows */
-        /* see http://www.quirksmode.org/blog/archives/2014/05/html5_dev_conf.html and http://dev.w3.org/csswg/css-device-adapt/ */
-        @-ms-viewport { user-zoom: fixed ; min-zoom: 100% ; max-zoom: 100% ; width: 100vw ; }
-        @viewport     { user-zoom: fixed ; min-zoom: 100% ; max-zoom: 100% ; width: 100vw ; }
+      /* following two viewport lines are equivalent to meta viewport statement above, and is needed for Windows */
+      /* see http://www.quirksmode.org/blog/archives/2014/05/html5_dev_conf.html and http://dev.w3.org/csswg/css-device-adapt/ */
+      @-ms-viewport { user-zoom: fixed ; min-zoom: 100% ; max-zoom: 100% ; width: 100vw ; }
+      @viewport     { user-zoom: fixed ; min-zoom: 100% ; max-zoom: 100% ; width: 100vw ; }
     </style>
-
     <link rel="stylesheet" href="css/app.css">
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
     <link rel="stylesheet" href="css/signature-pad.css">
-    
-</head>
-
-<body>
-<div class="app">
-
-    <!-- IMPORTANT: Do not include a weinre script tag as part of your release builds! -->
-    <!-- Place your remote debugging weinre script URL here, if it does not work below. -->
-
-    
-    <h1>PackTrack</h1>
-
-    
-    <p class="align-center">
+  </head>
+  <body>
+    <div class="app">
+      <!-- IMPORTANT: Do not include a weinre script tag as part of your release builds! -->
+      <!-- Place your remote debugging weinre script URL here, if it does not work below. -->
+      <h1>PackTrack</h1>
+      <p class="align-center">
         <button type="button" id="id_btnScan" onclick="scan();">Receive</button>
-    </p>
-
-    <p class="align-center">
+      </p>
+      <p class="align-center">
         <button type="button" id="id_btnScan" onclick="packageDelivery();">Deliver</button>
-    </p>
-    
-    <!-- Setup hidden field to store the package number -->
-    
-    <input type="hidden" name="package_number" id="package_number" value="">
-
-    <!-- Set the bootstrap -->
-    
-   <div class="modal fade" id="user-info" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
-	<div class="modal-dialog modal-sm" role="document">
-		<div class="modal-content">
-		<div class="modal-body">
-   <form>
-       <div class="form-group">
-           <label for="to_recipient">To:</label>
-           <input type="text" class="form-control" id="to_recipient">
-       </div>
-       
-        <div class="form-group">
-           <label for="from">From:</label>
-           <input type="text" class="form-control" id="from">
-       </div>
-       
-        </form>
-  </div>
-		
-			<div class="modal-footer">
-			<button type="button" class="btn btn-default no" data-dismiss="modal">No</button>
-			<button type="button" class="btn btn-default ok">Ok</button>
-		</div>
-		</div>
-	</div>
-</div>
-    
-    
-      <div class="modal fade" id="signature-info" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
-	<div class="modal-dialog modal-sm" role="document">
-		<div class="modal-content">
-		<div class="modal-body">
-  
-       
-        <div class="wrapper" style="overflow:auto">
-            <h3>Sign Below:</h3>
-  <canvas id="signature-pad" class="signature-pad" width=400 height=200 style="background: white; border: 1px solid #777;"></canvas>
-            <br><br>
-             <form>
-       <div class="form-group">
-           <label for="to_recipient">Printed Name:</label>
-           <input type="text" class="form-control" id="printed_name">
-       </div>
-        </form>
-             <br><br>
-             <div class="form-group">
-  <button class="btn btn-default pull-right" id="save">Submit</button>
-  <button  class="btn btn-default pull-left" id="clear">Clear</button>
-</div>
-            
-</div>
-       
+      </p>
+      <!-- Setup hidden field to store the package number -->
+      <input type="hidden" name="package_number" id="package_number" value="">
+      <!-- Set the bootstrap -->
+      <div class="modal fade" id="user-info" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+        <div class="modal-dialog modal-sm" role="document">
+          <div class="modal-content">
+            <div class="modal-body">
+              <form>
+                <div class="form-group">
+                  <label for="to_recipient">To:</label>
+                  <input type="text" class="form-control" id="to_recipient">
+                </div>
+                <div class="form-group">
+                  <label for="from">From:</label>
+                  <input type="text" class="form-control" id="from">
+                </div>
+              </form>
             </div>
-		</div>
-	</div>
-</div>
-</div>
-
-  <!--  <div class="align-center">
-        <textarea id="id_textArea" class="align-left" readonly="readonly" wrap="off"></textarea>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default no" data-dismiss="modal">No</button>
+              <button type="button" class="btn btn-default ok">Ok</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="signature-info" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+        <div class="modal-dialog modal-sm" role="document">
+          <div class="modal-content">
+            <div class="modal-body">
+              <div class="wrapper" style="overflow:auto">
+                <h3>Sign Below:</h3>
+                <canvas id="signature-pad" class="signature-pad" width=400 height=200 style="background: white; border: 1px solid #777;"></canvas>
+                <br><br>
+                <form>
+                  <div class="form-group">
+                    <label for="to_recipient">Printed Name:</label>
+                    <input type="text" class="form-control" id="printed_name">
+                  </div>
+                </form>
+                <br><br>
+                <div class="form-group">
+                  <button class="btn btn-default pull-right" id="save">Submit</button>
+                  <button  class="btn btn-default pull-left" id="clear">Clear</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  -->
-
+    <!--  <div class="align-center">
+      <textarea id="id_textArea" class="align-left" readonly="readonly" wrap="off"></textarea>
+      </div>
+      -->
     <!-- IMPORTANT: Do not include a weinre script tag as part of your release builds! -->
     <!-- Place your remote debugging weinre script URL here, if it does not work above. -->
-    
     <!-- "Phantom" cordova.js required for projects that use plugins -->
-   
-    
     <script type="text/javascript" src="cordova.js"></script>
-
     <script  type="text/javascript"  src="js/jquery-3.2.1.min.js"></script>
     <script  type="text/javascript"  src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
     <script  type="text/javascript"  src="js/signature_pad.js"></script>
@@ -139,7 +104,5 @@
     <script  type="text/javascript"  src="xdk/init-dev.js"></script>
     <script  type="text/javascript"  src="js/util.js"></script> 
     <script  type="text/javascript"  src="js/index.js"></script>
-
-</body>
-
+  </body>
 </html>
