@@ -52,6 +52,15 @@ function packageDelivery() {
       var cancelButton = document.getElementById('clear');  /// clear the signature pad
       var deliveryName = document.getElementById('printed_name'); // capture the input name of the package delivery officer
 
+
+       var  signaturePad =  new SignaturePad(document.getElementById('signature-pad'), {
+            backgroundColor: 'rgba(255, 255, 255, 0)',
+            penColor: 'rgb(0, 0, 0)'
+        });
+
+       var packageNumber = "";
+
+
       cordova.plugins.barcodeScanner.scan(function(result) {
          //console.log(fName, "Scanned result found!"); for debugging purposes only
 
@@ -61,9 +70,11 @@ function packageDelivery() {
 
           alert("Scann Succeded!\n" + "Result: " + result.text + "\n");
 
-          var packageNumber = result.text; // get the package number from the barcode scanner
+          packageNumber = result.text; // get the package number from the barcode scanner
+          packageNumber = packageNumber.replace(/[/]/g,'');
+          console.log('packageNumber', packageNumber);
                                             
-            var signaturePad = null;       // initialize the canvas for signature
+           // var signaturePad = null;       // initialize the canvas for signature
 
           /* Once the package has been scanned and the user signs that the package
             has been delivered then the package number is sent to the server;
@@ -72,14 +83,11 @@ function packageDelivery() {
 
           makeAjaxRequest(baseURL + 'packages/' + packageNumber + '/user', {}, 'GET') 
             .done(function(res) {
+                // clear prited name field
+                 document.getElementById('printed_name').value = '';
               if (res.status) {
                 
                 var found = confirm("Please confirm the package recipient \n Recipient Name: " + res.data.name + "\n" + " Package Number: " + packageNumber);    // shows confirmation dialog
-
-                signaturePad =  new SignaturePad(document.getElementById('signature-pad'), {
-                    backgroundColor: 'rgba(255, 255, 255, 0)',
-                    penColor: 'rgb(0, 0, 0)'
-                });
 
                 if (found) {
                   modalForm.modal('show');   // hide the modal form
@@ -103,14 +111,19 @@ function packageDelivery() {
       );
       // Save the signature and package number
       saveButton.addEventListener('click', function(event) {
+        var _this = this;
         var data = signaturePad.toDataURL('image/png');     // converts the signature to base64 image data
         var printedName = deliveryName.value;    // get the client's delivering the package name
+
+        packageNumber = packageNumber.replace(/[/]/g,'');
+        _this.disabled = true;
         
         makeAjaxRequest(baseURL + 'packages/' + packageNumber + '/deliver', {      // send the data to the server
           'package_number': packageNumber,      // package number
           'printed_name': printedName,          // client's name
           'signature': data       // signature
         }, 'POST').done(function(res) {         // successful response
+            _this.disabled = false;
           saveButton.removeEventListener('click', function() {});
           if (res.status) {      // if successful
             alert(res.message);
@@ -125,7 +138,7 @@ function packageDelivery() {
      
       cancelButton.addEventListener('click', function(event) {       // clear the signature canvas
         signaturePad.clear();
-        //return false;
+        return false;
       });
     }
   } catch (e) {
@@ -157,6 +170,9 @@ function scan() {     //packages receival
           alert("Scann Succeded!\n" + "Result: " + result.text + "\n");  //scanning succesful
 
           var packageNumber = result.text;      //outputs tracking number
+
+            packageNumber = packageNumber.replace(/[/]/g,'');
+          console.log('packageNumber', packageNumber);
 
           $(document).find('input[type="hidden"]#package_number').val(packageNumber); //search tracking number from the form
 
