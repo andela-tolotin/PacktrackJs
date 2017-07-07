@@ -8,7 +8,7 @@
 /*global $:false, intel:false app:false, dev:false, cordova:false */
 // This file contains your event handlers, the center of your application.
 // NOTE: see app.initEvents() in init-app.js for event handler initialization code.
-function myEventHandler() {  //cordova preparing the device
+function myEventHandler() {  //cordova code to initializing the device
   "use strict";
 
   var ua = navigator.userAgent;
@@ -53,7 +53,7 @@ function packageDelivery() {
       var deliveryName = document.getElementById('printed_name'); // capture the input name of the package delivery officer
 
       cordova.plugins.barcodeScanner.scan(function(result) {
-          //console.log(fName, "Scanned result found!"); for debugging purposes only
+         //console.log(fName, "Scanned result found!"); for debugging purposes only
 
           if (result.text == '') {
             return false;
@@ -62,17 +62,19 @@ function packageDelivery() {
           alert("Scann Succeded!\n" + "Result: " + result.text + "\n");
 
           var packageNumber = result.text; // get the package number from the barcode scanner
-           // initialize the canvas for signature
-            var signaturePad = null;
-          // Once the package has been scanned and the officer sign that the package
-          // was delivered then the package number is sent to the server
-          // if it has been delivered before then the user get inform and if not 
-          //  it gets a confirmation message that the package was successfully delivered.
-          makeAjaxRequest(baseURL + 'packages/' + packageNumber + '/user', {}, 'GET')
+                                            
+            var signaturePad = null;       // initialize the canvas for signature
+
+          /* Once the package has been scanned and the user signs that the package
+            has been delivered then the package number is sent to the server;
+            if it has been delivered before then the user get alert; and if not 
+            it gets a confirmation message that the package was successfully received and delivered.*/
+
+          makeAjaxRequest(baseURL + 'packages/' + packageNumber + '/user', {}, 'GET') 
             .done(function(res) {
               if (res.status) {
-                // show confirmation dialog
-                var found = confirm("Please confirm the package recipient \n Recipient Name: " + res.data.name + "\n" + " Package Number: " + packageNumber);
+                
+                var found = confirm("Please confirm the package recipient \n Recipient Name: " + res.data.name + "\n" + " Package Number: " + packageNumber);    // shows confirmation dialog
 
                 signaturePad =  new SignaturePad(document.getElementById('signature-pad'), {
                     backgroundColor: 'rgba(255, 255, 255, 0)',
@@ -80,20 +82,20 @@ function packageDelivery() {
                 });
 
                 if (found) {
-                  modalForm.modal('show'); // hide the modal form
+                  modalForm.modal('show');   // hide the modal form
                 }
 
                 return false;
               }
 
-              return alert(res.message); //alert when package has never been receive, meaning was not found in the database.
+              return alert(res.message);    //alert when package has never been receive, meaning was not found in the database.
 
-            }).fail(function(error) {   //fails due ti server or network   
-             // console.log('Error', error); for debugging purposes
+            }).fail(function(error) {       //fails due ti server or network   
+                // console.log('Error', error); for debugging purposes
 
             });
         },
-        function(error) {       //when the scannig fails, device failure
+        function(error) {    //when the scannig fails, device failure
           alert("Scanning failed: " + error);
         }, {
           orientation: "portrait"   //keeps the screen in portrait mode
@@ -101,29 +103,29 @@ function packageDelivery() {
       );
       // Save the signature and package number
       saveButton.addEventListener('click', function(event) {
-        var data = signaturePad.toDataURL('image/png'); // convert the signature to base64 image data
-        var printedName = deliveryName.value; // get the officer delivering the package name
-        // send the data to the server
-        makeAjaxRequest(baseURL + 'packages/' + packageNumber + '/deliver', {
-          'package_number': packageNumber, // package number
-          'printed_name': printedName, // officer name
-          'signature': data // signature
-        }, 'POST').done(function(res) { // successful response
+        var data = signaturePad.toDataURL('image/png');     // converts the signature to base64 image data
+        var printedName = deliveryName.value;    // get the client's delivering the package name
+        
+        makeAjaxRequest(baseURL + 'packages/' + packageNumber + '/deliver', {      // send the data to the server
+          'package_number': packageNumber,      // package number
+          'printed_name': printedName,          // client's name
+          'signature': data       // signature
+        }, 'POST').done(function(res) {         // successful response
           saveButton.removeEventListener('click', function() {});
-          if (res.status) { // if successful
+          if (res.status) {      // if successful
             alert(res.message);
-            return modalForm.modal('hide'); // hide modal form
+            return modalForm.modal('hide');        // hide modal form
           }
           alert(res.message);
-          return modalForm.modal('hide'); // hide modal form
+          return modalForm.modal('hide');       // hide modal form
         }).fail(function(error) {
           //console.log('Error:', error); for debugging purposes only
         });
       });
-      // clear the signature canvas
-      cancelButton.addEventListener('click', function(event) {
+     
+      cancelButton.addEventListener('click', function(event) {       // clear the signature canvas
         signaturePad.clear();
-        // return false;
+        //return false;
       });
     }
   } catch (e) {
@@ -148,13 +150,13 @@ function scan() {     //packages receival
 
          // console.log(fName, "Scanned result found!");for debugging purposes
 
-          if (result.text == '') {  //if barcide scanner cannot be red by barcode scanner
+          if (result.text == '') {    //if barcode cannot be red by barcode scanner
             return false;
           }
 
-          alert("Scann Succeded!\n" + "Result: " + result.text + "\n");  //scannin succesful
+          alert("Scann Succeded!\n" + "Result: " + result.text + "\n");  //scanning succesful
 
-          var packageNumber = result.text;  //outputs tracking number
+          var packageNumber = result.text;      //outputs tracking number
 
           $(document).find('input[type="hidden"]#package_number').val(packageNumber); //search tracking number from the form
 
@@ -166,26 +168,26 @@ function scan() {     //packages receival
 
       );
 
-      okButton.on('click', function() {  //submits the form in form of number, recipient and sender
+      okButton.on('click', function() {         //submits the form in form of number, recipient and sender
         var packageNumber = $(document).find('input[type="hidden"]#package_number').val();
         var recipient = modalForm.find('input#to_recipient').val();
         var sender = modalForm.find('input#from').val();
 
-        makeAjaxRequest('https://packtracking.herokuapp.com/api/packages', {    //API end point
+        makeAjaxRequest('https://packtracking.herokuapp.com/api/packages', {    //API endpoint
           'package_number': packageNumber, 
           'sender': sender,
           'recipient': recipient,
         }, 'POST').done(function(data) {
 
-          okButton.unbind('click');  //unbinind the event to prevent multiple submitions
+          okButton.unbind('click');          //unbinind the event to prevent multiple submitions
 
-          if (data.status) {          //if submited hides the moal form then return success message
+          if (data.status) {                 //if submited hides the moal form then return success message
             modalForm.modal('hide');
             clearForm(modalForm);
             return alert(data.message);
           }
 
-          alert(data.message);   //returns error if not added then clears the form and hide the modal form
+          alert(data.message);          //returns error if not added then clears the form and hide the modal form
           clearForm(modalForm);
           return modalForm.modal('hide');
 
@@ -211,7 +213,7 @@ function clearForm(modalForm) {     //clears the form input fields
 
 }
 
-function makeAjaxRequest(url, params, method) {     //makes AJAX request and returns a promise
+function makeAjaxRequest(url, params, method) {     //makes AJAX request and returns a premise
   return $.ajax({
     url: url,
     type: method,
@@ -237,7 +239,7 @@ function showModalForm() {      //auto complete for modal form
       }
     };
 
-    // Append the autocomplete to the modal form
+    // Appends the autocomplete to the modal form
     var modalForm = $(document).find('div#user-info');
     if (modalForm.length > 0) {
       var fInput = $("input#to_recipient");
