@@ -22,8 +22,8 @@
         <param name="android-package" value="com.android.plugins.Permissions" />
     </feature>
     <name>PackTrack</name>
-    <description>Intel XDK sample</description>
-    <author>Intel XDK</author>
+    <description>Package Tracking</description>
+    <author>Branislav Muntag</author>
     <content src="index.html" />
     <access origin="*" />
     <allow-intent href="tel:*" />
@@ -33,6 +33,7 @@
     <config-file mode="merge" parent="/manifest/application" platform="android">
         <activity android:launchMode="singleTop" />
     </config-file>
+    <icon density="hdpi" src="www/res/android/hdpi.png" />
     <preference name="loglevel" value="DEBUG" />
     <preference name="android-build-tool" value="gradle" />
     <preference name="phonegap-version" value="cli-6.2.0" />

@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget android-versionCode="1" id="xdk.intel.sample" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:gap="http://phonegap.com/ns/1.0">
     <name>PackTrack</name>
-    <description>Intel XDK sample</description>
-    <author>Intel XDK</author>
+    <description>Package Tracking</description>
+    <author>Branislav Muntag</author>
     <content src="index.html" />
     <preference name="android-build-tool" value="gradle" />
     <preference name="phonegap-version" value="cli-6.2.0" />
@@ -16,6 +16,7 @@
         <preference name="StatusBarStyle" value="lightcontent" />
     </platform>
     <platform name="android">
+        <icon density="hdpi" src="www/res/android/hdpi.png" />
         <preference name="SplashMaintainAspectRatio" value="false" />
     </platform>
     <access origin="*" />
