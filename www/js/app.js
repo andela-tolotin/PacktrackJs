@@ -39,8 +39,6 @@ function packageDelivery() {
   var baseURL = "https://packtracking.herokuapp.com/api/";
   var fName = "scan():";
 
-  //console.log(fName, "entry"); for debugging purposes only
-
   try {
     if (window.tinyHippos) {
       thirdPartyEmulator();
@@ -60,9 +58,7 @@ function packageDelivery() {
 
        var packageNumber = "";
 
-
       cordova.plugins.barcodeScanner.scan(function(result) {
-         //console.log(fName, "Scanned result found!"); for debugging purposes only
 
           if (result.text == '') {
             return false;
@@ -71,11 +67,8 @@ function packageDelivery() {
           alert("Scann Succeded!\n" + "Result: " + result.text + "\n");
 
           packageNumber = result.text; // get the package number from the barcode scanner
-          packageNumber = packageNumber.replace(/[/]/g,'');
-          console.log('packageNumber', packageNumber);
-                                            
+          packageNumber = packageNumber.replace(/[/]/g,'');       
            // var signaturePad = null;       // initialize the canvas for signature
-
           /* Once the package has been scanned and the user signs that the package
             has been delivered then the package number is sent to the server;
             if it has been delivered before then the user get alert; and if not 
@@ -84,23 +77,22 @@ function packageDelivery() {
           makeAjaxRequest(baseURL + 'packages/' + packageNumber + '/user', {}, 'GET') 
             .done(function(res) {
                 // clear prited name field
-                 document.getElementById('printed_name').value = '';
+                document.getElementById('printed_name').value = '';
               if (res.status) {
                 
                 var found = confirm("Please confirm the package recipient \n Recipient Name: " + res.data.name + "\n" + " Package Number: " + packageNumber);    // shows confirmation dialog
 
                 if (found) {
-                  modalForm.modal('show');   // hide the modal form
+                  modalForm.modal('show');// hide the modal form
                 }
 
                 return false;
               }
 
-              return alert(res.message);    //alert when package has never been receive, meaning was not found in the database.
+              return alert(res.message);//alert when package has never been receive, meaning was not found in the database.
 
-            }).fail(function(error) {       //fails due ti server or network   
-                // console.log('Error', error); for debugging purposes
-
+            }).fail(function(error) {//fails due ti server or network   
+              // console.log('Error', error); for debugging purposes
             });
         },
         function(error) {    //when the scannig fails, device failure
@@ -147,7 +139,7 @@ function packageDelivery() {
 
 }
 
-function scan() {     //packages receival
+function scan() {//packages receival
   "use strict";
   var fName = "scan():";    
   //console.log(fName, "entry");for debugging purposes
@@ -157,79 +149,65 @@ function scan() {     //packages receival
       thirdPartyEmulator();
     //  console.log(fName, "emulator alert");for debugging purposes
     } else {
-      var modalForm = $(document).find('div#user-info'); //modal form TO and FROM
-      var okButton = modalForm.find('button.ok');
       cordova.plugins.barcodeScanner.scan(function(result) { //cordova barcode scanner initialization plugin 
-
-         // console.log(fName, "Scanned result found!");for debugging purposes
-
           if (result.text == '') {    //if barcode cannot be red by barcode scanner
             return false;
           }
-
           alert("Scann Succeded!\n" + "Result: " + result.text + "\n");  //scanning succesful
-
           var packageNumber = result.text;      //outputs tracking number
-
-            packageNumber = packageNumber.replace(/[/]/g,'');
-          console.log('packageNumber', packageNumber);
-
+          packageNumber = packageNumber.replace(/[/]/g,'');
           $(document).find('input[type="hidden"]#package_number').val(packageNumber); //search tracking number from the form
-
-          showModalForm();      //activates modal form
+          showModalForm(); //activates modal form
         },
         function(error) {          //scanning failed due to device failure
           alert("Scanning failed: " + error);
         },
-
       );
-
-      okButton.on('click', function() {         //submits the form in form of number, recipient and sender
-        var packageNumber = $(document).find('input[type="hidden"]#package_number').val();
-        var recipient = modalForm.find('input#to_recipient').val();
-        var sender = modalForm.find('input#from').val();
-
-        makeAjaxRequest('https://packtracking.herokuapp.com/api/packages', {    //API endpoint
-          'package_number': packageNumber, 
-          'sender': sender,
-          'recipient': recipient,
-        }, 'POST').done(function(data) {
-
-          okButton.unbind('click');          //unbinind the event to prevent multiple submitions
-
-          if (data.status) {                 //if submited hides the moal form then return success message
-            modalForm.modal('hide');
-            clearForm(modalForm);
-            return alert(data.message);
-          }
-
-          alert(data.message);          //returns error if not added then clears the form and hide the modal form
-          clearForm(modalForm);
-          return modalForm.modal('hide');
-
-        }).fail(function(error) {       //if AJAX fails report the error
-        //return console.log(error); for debugging only
-        });
-
-        return false;       //prevent form from reloading when the buttonis clicked
-
-      });
-
     }
   } catch (e) {     //catch any errors 
     //console.log(fName, "catch, failure");for debugging only
   }
-
   //console.log(fName, "exit");for debugging only
+}
+
+addPackageRecipient(); // listen to the ok button and save the recipient information
+
+function addPackageRecipient() {
+  var modalForm = $(document).find('div#user-info'); //modal form TO and FROM
+  var okButton = modalForm.find('button.ok');
+  okButton.on('click', function() {         //submits the form in form of number, recipient and sender
+    var packageNumber = $(document).find('input[type="hidden"]#package_number').val();
+    var recipient = modalForm.find('input#to_recipient').val();
+    var sender = modalForm.find('input#from').val();
+
+    makeAjaxRequest('https://packtracking.herokuapp.com/api/packages', { //API endpoint
+      'package_number': packageNumber, 
+      'sender': sender,
+      'recipient': recipient,
+    }, 'POST').done(function(data) {
+      okButton.unbind('click');          //unbinind the event to prevent multiple submitions
+      if (data.status) {                 //if submited hides the moal form then return success message
+        modalForm.modal('hide');
+        clearForm(modalForm);
+        return alert(data.message);
+      }
+      alert(data.message);          //returns error if not added then clears the form and hide the modal form
+      clearForm(modalForm);
+      return modalForm.modal('hide');
+
+    }).fail(function(error) { //if AJAX fails report the error
+    //return console.log(error); for debugging only
+    });
+    return false; //prevent form from reloading when the buttonis clicked
+  });
 }
 
 function clearForm(modalForm) {     //clears the form input fields
   modalForm.find('input#to_recipient').val('');     //empies the field
   modalForm.find('input#from').val('');     //empies the field
-
 }
 
-function makeAjaxRequest(url, params, method) {     //makes AJAX request and returns a premise
+function makeAjaxRequest(url, params, method) { //makes AJAX request and returns a premise
   return $.ajax({
     url: url,
     type: method,
